@@ -1,11 +1,12 @@
 
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import { Table } from 'react-bootstrap';
+import EmployeeTable from './EmployeeTable';
 
 function App() {
   const [employees, setEmployees] = useState([])
   const [filtered, setFiltered] = useState([])
+  const [searchState, setSearchState] = useState('')
 
   useEffect(() => {
     fetch('https://randomuser.me/api/?nat=us&results=25')
@@ -30,6 +31,7 @@ function App() {
     })
     setFiltered(sorted);
   }
+
   const sortByFirstName = () => {
     const sorted = [...employees];
     sorted.sort((a,b) =>{
@@ -42,30 +44,22 @@ function App() {
     })
     setFiltered(sorted);
   }
+
+  const handleFilterChange = (e) => {
+    setSearchState(e.target.value);
+    const results = employees.filter(emp => {
+      return emp.location.state.toLowerCase().includes(e.target.value.toLowerCase());
+    })
+    setFiltered(results);
+  }
+
   return (
     <div className="App">
       <h1>Employee Directory</h1>
-
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th onClick={sortByLastName}>Last Name</th>
-            <th onClick={sortByFirstName}>First Name</th>
-            <th>Gender</th>
-            <th>Location</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map(emp => (
-            <tr key={emp.id.value}>
-              <td>{emp.name.last}</td>
-              <td>{emp.name.first}</td>
-              <td>{emp.location.state}</td>
-              <td>{emp.gender}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <form className="m-4">
+        <input style={{width: '250px', textAlign:'center'}} type='text' placeholder="Search employees by state" value={searchState} onChange={handleFilterChange}/>
+      </form>
+      <EmployeeTable filtered={filtered} sortByLastName={sortByLastName} sortByFirstName={sortByFirstName} />
     </div>
   );
 }
